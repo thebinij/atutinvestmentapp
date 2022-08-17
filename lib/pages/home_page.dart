@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import '../firebase_options.dart';
+import 'dart:developer' as devtools show log;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -23,23 +24,55 @@ class _HomePageState extends State<HomePage> {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
             final user = FirebaseAuth.instance.currentUser;
-            print(user);
             if (user != null) {
               if (user.emailVerified) {
-                print('You are a verified user');
+                devtools.log('Is Verified!!');
+                return const HomeView();
               } else {
-                print('Please Verify');
                 return const VerifyEmail();
               }
             } else {
-              print('Please Login');
               return const LoginPage();
             }
-            return const Text('Done!');
           default:
             return const CircularProgressIndicator();
         }
       },
+    );
+  }
+}
+
+enum MenuAction { logout }
+
+class HomeView extends StatefulWidget {
+  const HomeView({Key? key}) : super(key: key);
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Main UI'), actions: [
+        PopupMenuButton<MenuAction>(
+          onSelected: (value) {
+            devtools.log(
+              value.toString(),
+            );
+          },
+          itemBuilder: (context) {
+            return const [
+              PopupMenuItem<MenuAction>(
+                value: MenuAction.logout,
+                child: Text('Logout'),
+              ),
+            ];
+          },
+        )
+      ]),
+      body: const Text('You are Logged In. Welcome Home!'),
     );
   }
 }
